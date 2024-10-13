@@ -17,9 +17,9 @@ import com.umesh.medicineassignment.model.Medicine
 import com.umesh.medicineassignment.ui.ViewModel
 
 @Composable
-fun HomeScreen(username: String, navController: NavController) {
-    val defaultUsername = "User" // Default username
-    val displayName = username ?: defaultUsername // Use default if username is null or empty
+fun HomeScreen(username: String?, navController: NavController) {
+    val defaultUsername = "User"
+    val displayName = username?.takeIf { it.isNotBlank() } ?: defaultUsername
 
     val greeting = when {
         java.time.LocalTime.now().hour < 12 -> "Good morning"
@@ -44,29 +44,35 @@ fun HomeScreen(username: String, navController: NavController) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        if (isLoading) {
-            CircularProgressIndicator() // Show loading indicator
-        } else {
-            if (medicines.isEmpty()) {
-                Box(
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (isLoading) {
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .fillMaxSize(), // Fill the entire screen
-                    contentAlignment = Alignment.Center // Center the content
-                ) {
-                    Text(
-                        text = "No medicines available.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+                        .align(Alignment.Center)
+                        .size(64.dp) // Adjust size as needed
+                )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(medicines) { medicine ->
-                        MedicineCard(medicine) { selectedMedicine ->
-                            navController.navigate("medicineDetail/${selectedMedicine.name}/${selectedMedicine.dose}/${selectedMedicine.strength}")
+                if (medicines.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(), // Fill the entire screen
+                        contentAlignment = Alignment.Center // Center the content
+                    ) {
+                        Text(
+                            text = "No medicines available.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        items(medicines) { medicine ->
+                            MedicineCard(medicine) { selectedMedicine ->
+                                navController.navigate("medicineDetail/${selectedMedicine.name}/${selectedMedicine.dose}/${selectedMedicine.strength}")
+                            }
                         }
                     }
                 }
